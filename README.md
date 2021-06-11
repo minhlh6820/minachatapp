@@ -1,16 +1,16 @@
 # Mina Chat Application
 
-- Code app nằm trong folder appCode
+Code app nằm trong folder appCode
 
-- Code Mina Server nằm trong folder minaServer. Trước khi chạy cần thêm các file jar trong folder externalLib trong minaServer vào trong thư viện (Trong trường hợp Eclipse sử dụng Add External JARs)
+Code Mina Server nằm trong folder minaServer. Trước khi chạy cần thêm các file jar trong folder externalLib trong minaServer vào trong thư viện (Trong trường hợp Eclipse sử dụng Add External JARs)
 
-- Trước khi chạy cần đảm bảo:
+Trước khi chạy cần đảm bảo:
 
 + Server và máy chạy app cùng kết nối với 1 wifi
 
 + Sửa địa chỉ ipv6 tại biến HOSTNAME trong file Client.java tại code Mina Server và biến serverIp trong file MySocket.java tại code app
 
-- Kịch bản chạy của em:
+Kịch bản chạy của em:
 
 + Chạy file MinaTimeServer.java của code Mina Server
 
@@ -22,7 +22,7 @@
 
 + Tại màn hình chat, gửi text bằng cách edit text và nhấn nút "Send"; gửi file bằng cách nhấn "Browse", chọn file rồi cuối cùng nhấn "Upload" (khi user kia nhận đủ file data sẽ có thông báo "Uploading completed" trên màn hình). Để kích hoạt gửi trên các thread user, gửi tin nhắn text "hello". Thoát khỏi màn hình chat bằng cách nhấn "Exit".
 
-- 1 số vấn đề:
+1 số vấn đề:
 
 + Khi thoát màn chat thì toàn bộ phần chat đó sẽ không được lưu.
 
