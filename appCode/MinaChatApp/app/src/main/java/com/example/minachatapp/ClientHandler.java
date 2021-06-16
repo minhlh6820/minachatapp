@@ -63,6 +63,7 @@ public class ClientHandler extends IoHandlerAdapter {
         for(int i=0; i<requestedList.size(); i++) {
             s[i] = requestedList.get(i);
         }
+//        System.out.println(requestedList.size() + "--" + s.length);
         return s;
     }
 
@@ -85,7 +86,7 @@ public class ClientHandler extends IoHandlerAdapter {
 
         if(str.contains("FRIENDS LIST")) {
             str = str.replaceFirst("FRIENDS LIST " + username + ": ", "");
-            if(!str.contains("NULL")) {
+            if(!str.equals("NULL")) {
                 String[] list = str.split("--");
                 for (String s: list) {
                     if(!friendsList.contains(s)) {
@@ -96,8 +97,9 @@ public class ClientHandler extends IoHandlerAdapter {
         }
 
         if(str.contains("REQUESTS LIST")) {
+            System.out.println(str);
             str = str.replaceFirst("REQUESTS LIST " + username + ": ", "");
-            if(!str.contains("NULL")) {
+            if(!str.equals("NULL")) {
                 String[] list = str.split("--");
                 for (String s: list) {
                     if(!requestedList.contains(s)) {
@@ -105,7 +107,6 @@ public class ClientHandler extends IoHandlerAdapter {
                     }
                 }
             }
-
         }
 
         if(str.contains("ACCEPT CONNECT")) {

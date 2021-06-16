@@ -56,8 +56,8 @@ public class Message {
         String[] msgContent = originalMsg.split("---", 4);
         if(msgContent[3].equals("END")) {
             boolean check = verifySignature(originalMsg, guestPubKey, msg[1]);
-            System.out.println("\n" + originalMsg);
-            System.out.println(check + "--" + msgContent[0].equals(username));
+//            System.out.println("\n" + originalMsg);
+//            System.out.println(check + "--" + msgContent[0].equals(username));
             if(check) {
                 if(msgContent[0].equals(username)) {
                     tagNumber = Integer.valueOf(msgContent[1]);

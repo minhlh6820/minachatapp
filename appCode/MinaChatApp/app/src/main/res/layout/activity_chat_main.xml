@@ -8,15 +8,16 @@
 
     <TextView
         android:id="@+id/unTxtView1"
-        android:layout_width="362dp"
-        android:layout_height="38dp"
+        android:layout_width="151dp"
+        android:layout_height="36dp"
         android:layout_marginStart="29dp"
         android:layout_marginLeft="29dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginEnd="45dp"
+        android:layout_marginRight="45dp"
         android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/roomNumTxtView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -62,8 +63,8 @@
 
     <Button
         android:id="@+id/logoutBtn"
-        android:layout_width="94dp"
-        android:layout_height="55dp"
+        android:layout_width="118dp"
+        android:layout_height="54dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="14dp"
@@ -84,5 +85,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/logoutBtn"
         app:layout_constraintStart_toEndOf="@+id/addConnectBtn" />
+
+    <TextView
+        android:id="@+id/roomNumTxtView"
+        android:layout_width="163dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="23dp"
+        android:layout_marginRight="23dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/editTxtSearchRequest"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

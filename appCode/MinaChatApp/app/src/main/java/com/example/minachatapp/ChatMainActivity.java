@@ -44,6 +44,7 @@ public class ChatMainActivity extends AppCompatActivity {
     private Button logoutBtn;
     private Button refreshBtn;
     private TextView unameTxt;
+    private TextView roomNumTxt;
     private Button addConnectBtn;
     private ListView requestedView;
     private ArrayAdapter<String> adapter = null;
@@ -64,6 +65,7 @@ public class ChatMainActivity extends AppCompatActivity {
         username = getIntent().getStringExtra("USERNAME");
 
         this.unameTxt = (TextView) this.findViewById(R.id.unTxtView1);
+        this.roomNumTxt = (TextView) this.findViewById(R.id.roomNumTxtView);
         this.requestedView = (ListView) this.findViewById(R.id.requestView);
         this.searchTxt = (TextView) this.findViewById(R.id.editTxtSearchRequest);
         this.logoutBtn = (Button) this.findViewById(R.id.logoutBtn);
@@ -72,7 +74,7 @@ public class ChatMainActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        unameTxt.setText("Username: " + username);
+        unameTxt.setText(username);
 
         this.openConnector();
         this.initListView(builder);
@@ -115,11 +117,15 @@ public class ChatMainActivity extends AppCompatActivity {
                     future.awaitUninterruptibly();
                     session = future.getSession();
                 }
+//                refreshBtn.setEnabled(false);
+//                roomNumTxt.setText("Please wait!");
                 session.write("GET REQUESTS: " + username);
                 session.getCloseFuture().awaitUninterruptibly();
                 requestedList = handler.getRequestedList();
                 adapter = new ArrayAdapter<String>(ChatMainActivity.this, android.R.layout.simple_list_item_1, requestedList);
                 requestedView.setAdapter(adapter);
+                roomNumTxt.setText(requestedList.length + " available rooms!");
+//                refreshBtn.setEnabled(true);
             }
         });
 
@@ -165,6 +171,7 @@ public class ChatMainActivity extends AppCompatActivity {
         session.write("GET REQUESTS: " + username);
         session.getCloseFuture().awaitUninterruptibly();
         requestedList = handler.getRequestedList();
+        roomNumTxt.setText(requestedList.length + " available rooms!");
 //        future = connector.connect(socket);
 //        future.awaitUninterruptibly();
 //        session = future.getSession();
@@ -211,6 +218,7 @@ public class ChatMainActivity extends AppCompatActivity {
                     requestedList = handler.getRequestedList();
                     adapter = new ArrayAdapter<String>(ChatMainActivity.this, android.R.layout.simple_list_item_1, requestedList);
                     requestedView.setAdapter(adapter);
+                    roomNumTxt.setText(requestedList.length + " available rooms!");
                 } else {
                     handler.stopLogger();
                     connector.dispose();

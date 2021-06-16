@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -156,7 +157,7 @@ class TimeServerHandler extends IoHandlerAdapter
 	private IoAcceptor acceptor = null;
 	private ArrayList<User> userList = null;
 	private Map<String, String> connectedMap = new HashMap<String, String>();
-	
+	private Map<String, String> newConnectedMap = new HashMap<String, String>();	
 	
 	public TimeServerHandler(ArrayList<User> userList, IoAcceptor acceptor) {
 		// TODO Auto-generated constructor stub
@@ -214,6 +215,12 @@ class TimeServerHandler extends IoHandlerAdapter
         		}
         	}
         	
+        	Thread.sleep(500);
+        	if(newConnectedMap.size() != 0) {
+				connectedMap.putAll(newConnectedMap);
+				newConnectedMap.clear();
+			}
+        	
         	if(connectedMap.size() != 0) {
         		Iterator<String> it = connectedMap.keySet().iterator();
     			while(it.hasNext()) {
@@ -226,32 +233,72 @@ class TimeServerHandler extends IoHandlerAdapter
         	session.write("ACCEPT LOGOUT: " + name);
         }
         
-        if(str.contains("GET REQUESTS")) {
+        if(str.contains("GET REQUESTS")) {       	
         	String name = str.replaceFirst("GET REQUESTS: ", "");
-        	String msg = "REQUESTS LIST " + name + ": ";
+        	        	
+        	Thread.sleep(500);
+        	if(newConnectedMap.size() != 0) {
+				connectedMap.putAll(newConnectedMap);
+				newConnectedMap.clear();
+			}
+        	
+        	ArrayList<String> connectedList = new ArrayList<String>();
         	for(String connect: connectedMap.keySet()) {
         		if(connect.contains(name)) {
         			String[] names = connect.split("-");
-        			if(names[0].equals(name)) msg += "--" + names[1];
-        			else msg += "--" + names[0];
-        		}        		
+        			if(names[0].equals(name)) connectedList.add(names[1]);
+        			else connectedList.add(names[0]);
+        		}
         	}
-        	String finalMsg = msg.replaceFirst("--", "");
-        	if(finalMsg == msg) finalMsg += "NULL";
-        	session.write(finalMsg);
+        	
+        	if(connectedList.size() == 0) {
+        		String finalMsg = "REQUESTS LIST " + name + ": NULL";
+        		session.write(finalMsg);
+        	} else {
+//        		for(int start = 0; start < connectedList.size(); start += 50) {
+//        			List<String> subArr = connectedList.subList(start, (int) Math.min(start+50, connectedList.size()));
+//        			String msg = "REQUESTS LIST " + name + ": ";
+//        			for(String s: subArr) {
+//        				msg += "--" + s;
+//        			}
+//        			String finalMsg = msg.replaceFirst("--", "");
+//        			session.write(finalMsg);
+//        		}  
+        		String msg = "REQUESTS LIST " + name + ": ";
+    			for(String s: connectedList) {
+    				msg += "--" + s;
+    			}
+    			String finalMsg = msg.replaceFirst("--", "");
+    			session.write(finalMsg);
+        	}
+        	
         }
         
         if(str.contains("GET FRIENDS")) {
         	String name = str.replaceFirst("GET FRIENDS: ", "");
         	for(User u: userList) {
         		if(u.getName().equals(name)) {
-        			String msg = "FRIENDS LIST " + name + ": ";
-        			for(User a: u.getFriendsList()) {
-        				msg += "--" + a.getName();
+        			if(u.getFriendsList().size() == 0) {
+        				String finalMsg = "FRIENDS LIST " + name + ": NULL";
+        				session.write(finalMsg);
+        			} else {
+//        				for(int start = 0; start < u.getFriendsList().size(); start += 50) {
+//            				List<User> subArr = u.getFriendsList().subList(start, (int) Math.min(start+50, u.getFriendsList().size()));
+//            				String msg = "FRIENDS LIST " + name + ": ";
+//                			for(User a: subArr) {
+//                				msg += "--" + a.getName();
+//                			}
+//                			String finalMsg = msg.replaceFirst("--", "");
+//                			session.write(finalMsg);
+//            			}
+        				
+        				String msg = "FRIENDS LIST " + name + ": ";
+        				for(User a: u.getFriendsList()) {
+            				msg += "--" + a.getName();
+            			}
+            			String finalMsg = msg.replaceFirst("--", "");
+            			session.write(finalMsg);
         			}
-        			String finalMsg = msg.replaceFirst("--", "");
-                	if(finalMsg == msg) finalMsg += "NULL";
-                	session.write(finalMsg);
         			break;
         		}
         	}
@@ -288,6 +335,11 @@ class TimeServerHandler extends IoHandlerAdapter
         	for(User u: userList) {
         		if(u.getName().equals(clientUser)) {
         			if(u.isConnected() == true) {
+        				Thread.sleep(500);
+        				if(newConnectedMap.size() != 0) {
+        					connectedMap.putAll(newConnectedMap);
+        					newConnectedMap.clear();
+        				}
         				if(connectedMap.size() != 0) {
         					Iterator<Map.Entry<String, String>> it = connectedMap.entrySet().iterator();
         					while(it.hasNext()) {
@@ -316,11 +368,11 @@ class TimeServerHandler extends IoHandlerAdapter
         	if(accepted) {
 				if(port == null) {
 					port = (int)Math.floor(Math.random()*(65535-1024+1)+1024) + "";
-					while(connectedMap.containsValue(port + "") && port.equals("9123")) {
+					while(connectedMap.containsValue(port + "") && port.equals("9123") && newConnectedMap.containsValue(port + "")) {
 						// (int)Math.floor(Math.random()*(max-min+1)+min);
 						port = (int)Math.floor(Math.random()*(65535-1024+1)+1024) + "";
 					}
-					connectedMap.put(serverUser + "-" + clientUser, port);
+					newConnectedMap.put(serverUser + "-" + clientUser, port);
 				}
 			
 				session.write("ACCEPT CONNECT: " + serverUser + "--" + clientUser + "--" + clientIp + "--" + port + "--" + clientPubKey);

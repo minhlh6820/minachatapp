@@ -54,6 +54,7 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<Message> removeMsgList = new ArrayList<Message>();
     private Map<String, String[]> fileDataMap = new HashMap<String, String[]>();
     private int tagNumber = 1;
+    private boolean sending = false;
 //    private String finalMsg = "NULL";
 
     private BufferedReader in = null;
@@ -85,39 +86,56 @@ public class ChatActivity extends AppCompatActivity {
             public void run() {
 //                String viewTxt = name + " --- " + msg;
                 if(!isUser) {
-                    String viewTxt = guestname + "--" + msg;
+                    String viewTxt = guestname + ": " + msg;
                     int index = -1;
                     int tagNum = Integer.valueOf(msg.split("//")[0].trim());
+                    String content = msg.split("//")[1];
 
                     if(chatViewList.size() != 0) {
                         Iterator i = chatViewList.iterator();
                         while(i.hasNext()) {
                             String tmp = (String) i.next();
+
                             if(tmp.contains(guestname)) {
-                                String msgTmp = tmp.split("--")[1].trim();
-                                int tagNumTmp = Integer.valueOf(msgTmp.split("//")[0].trim());
-                                if(tagNum < tagNumTmp) {
-                                    index = chatViewList.indexOf(tmp);
+                                if(tmp.contains(content)) {
+                                    index = -9999;
                                     break;
+                                } else {
+                                    String msgTmp = tmp.split(":", 2)[1].trim();
+                                    String[] msgInfo = msgTmp.split("//", 2);
+                                    if(msg.contains("File") && msg.contains("Received")) {
+                                        if(msgInfo[1].contains("File") && msgInfo[1].contains("Receiving")) {
+                                            index = chatViewList.indexOf(tmp);
+                                            chatViewList.remove(index);
+                                            break;
+                                        }
+                                    } else {
+                                        int tagNumTmp = Integer.valueOf(msgInfo[0].trim());
+                                        if(tagNum < tagNumTmp) {
+                                            index = chatViewList.indexOf(tmp);
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
 
-                    if(index != -1) chatViewList.add(index, viewTxt);
-                    else chatViewList.add(viewTxt);
-//                    chatViewList.add(viewTxt);
+                    if(index != -9999) {
+                        if(index != -1) chatViewList.add(index, viewTxt);
+                        else chatViewList.add(viewTxt);
+                    }
 //                    chatViewList.add(chatView);
 
                 } else {
-                    String viewTxt = username + "--" + msg;
+                    String viewTxt = username + ": " + msg;
                     if(disconnected) {
-                        viewTxt += "--" + "Sending";
+                        viewTxt += " -- " + "Sending";
                         chatViewList.add(viewTxt);
 //                        chatView.setStatus(false);
 //                        chatViewList.add(chatView);
                     } else {
-                        viewTxt += "--" + "Sent";
+                        viewTxt += " -- " + "Sent";
                         int index = -1;
                         String tmp = "";
                         if(chatViewList.size() != 0) {
@@ -152,12 +170,13 @@ public class ChatActivity extends AppCompatActivity {
                             Iterator i = chatViewList.iterator();
                             while(i.hasNext()) {
                                 String tmpStr = (String) i.next();
-                                String[] strList = tmpStr.split("--");
+                                String[] strList = tmpStr.split(":", 2);
 
-                                if(strList[0].equals(username) && strList[1].equals(msg)) {
+                                if(strList[0].trim().equals(username)) {
+                                    strList = strList[1].trim().split("--", 2);
                                     index = chatViewList.indexOf(tmpStr);
 //                                    i.remove();
-                                    if(strList[2].equals("Sending"))
+                                    if(strList[1].trim().equals("Sending"))
                                         tmp = tmpStr.replaceAll("Sending", "Sent");
                                 }
                             }
@@ -242,6 +261,14 @@ public class ChatActivity extends AppCompatActivity {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
+                String checkMsg = "";
+                try {
+                    Message msgObj = new Message("JOIN ROOM " + port, username, priKey, guestPubKey, 0);
+                    checkMsg = msgObj.createSecuredMsg();
+                } catch (Exception e) {
+                    System.err.println("Cannot create check message");
+                }
+
                 while(!isExit) {
                     try {
                         if(removeMsgList.size() != 0) {
@@ -249,15 +276,20 @@ public class ChatActivity extends AppCompatActivity {
                             removeMsgList.clear();
                         }
 //                        System.out.println(sendMsgList.size());
-                        if(sendMsgList.size() != 0) {
+                        startUDPSender(checkMsg);
+                        Thread.sleep(1000);
+//                        System.out.println(sending);
+
+                        if(sending && sendMsgList.size() != 0) {
                             Iterator i = sendMsgList.iterator();
                             while(i.hasNext()) {
                                 Message msgObj = (Message) i.next();
                                 String securedMsg = msgObj.createSecuredMsg();
                                 startUDPSender(securedMsg);
                             }
+                            sending = false;
+                            Thread.sleep(3000);
                         }
-                        Thread.sleep(3000);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -303,108 +335,118 @@ public class ChatActivity extends AppCompatActivity {
                                 errorChatTxt.setText("Error message!");
                             } else {
 //                                System.out.println("Received message: " + receivedMsg);
-                                if(content.equals("EXIT")) {
+                                if(content.equals("EXIT ROOM " + port)) {
                                     receivedMsgList.clear();
-                                    tagNumber = 0;
-                                }
-
-                                if(!content.contains("RECEIVED")) {
-                                    boolean isReceived = false;
-                                    int tagNum = obj.getTagNumber();
-                                    Iterator i = receivedMsgList.iterator();
-                                    while(i.hasNext()) {
-                                        Message msgObjTmp = (Message) i.next();
-                                        if(msgObjTmp.getTagNumber() == tagNum && msgObjTmp.getContent().equals(content)) {
-                                            isReceived = true;
-                                            break;
+                                    tagNumber = 1;
+                                    sending = false;
+                                    guestNameTxt.setText(guestname + ": Exit room");
+                                } else if(content.equals("JOIN ROOM " + port)) {
+                                    sending = true;
+                                    guestNameTxt.setText(guestname + ": Join room");
+                                } else {
+                                    if(!content.contains("RECEIVED")) {
+                                        boolean isReceived = false;
+                                        int tagNum = obj.getTagNumber();
+                                        Iterator i = receivedMsgList.iterator();
+                                        while(i.hasNext()) {
+                                            Message msgObjTmp = (Message) i.next();
+                                            if(msgObjTmp.getTagNumber() == tagNum && msgObjTmp.getContent().equals(content)) {
+                                                isReceived = true;
+                                                break;
+                                            }
                                         }
-                                    }
 
-                                    if(!isReceived) {
-                                        if(content.contains("FILE")) {
-                                            String fileMsg = content.replaceAll("FILE ", "");
-                                            String[] infoFile = fileMsg.split("::");
-                                            String fileName = infoFile[0].trim();
-                                            int index = Integer.valueOf(infoFile[1].trim());
-                                            int numMsg = Integer.valueOf(infoFile[2].trim());
-                                            String tmpData = infoFile[3];
+                                        if(!isReceived) {
+                                            if(content.contains("FILE")) {
+                                                String fileMsg = content.replaceAll("FILE ", "");
+                                                String[] infoFile = fileMsg.split("::");
+                                                String fileName = infoFile[0].trim();
+                                                int index = Integer.valueOf(infoFile[1].trim());
+                                                int numMsg = Integer.valueOf(infoFile[2].trim());
+                                                String tmpData = infoFile[3];
 
 //                                            System.out.println(fileMsg);
 
-                                            if(fileDataMap.containsKey(fileName)) {
-                                                String[] fileContent = fileDataMap.get(fileName);
-                                                fileContent[index] = tmpData;
+                                                if(fileDataMap.containsKey(fileName)) {
+                                                    String[] fileContent = fileDataMap.get(fileName);
+                                                    fileContent[index] = tmpData;
 
-                                                if (!containNull(fileContent)) {
-                                                    log(tagNum + "//" + "File " + fileName, false, false);
-                                                    String completedMsg = "RECEIVED FILE " + fileName;
-                                                    Message completedMsgObj = new Message(completedMsg, username, priKey, guestPubKey, 0);
-                                                    completedMsg = completedMsgObj.createSecuredMsg();
-                                                    startUDPSender(completedMsg);
+                                                    if (!containNull(fileContent)) {
+                                                        String completedMsg = "RECEIVED FILE " + fileName;
+                                                        Message completedMsgObj = new Message(completedMsg, username, priKey, guestPubKey, 0);
+                                                        completedMsg = completedMsgObj.createSecuredMsg();
+                                                        startUDPSender(completedMsg);
+                                                        log(tagNum + "//" + "File " + fileName + " -- Received" , false, false);
+//                                                        errorChatTxt.setText("Received file");
+                                                    }
+                                                } else {
+                                                    String[] fileContent = new String[numMsg+1];
+                                                    fileContent[index] = tmpData;
+                                                    fileDataMap.put(fileName, fileContent);
+                                                    log(tagNum + "//" + "File " + fileName + " -- Receiving" , false, false);
+//                                                    errorChatTxt.setText("Receiving file! Please wait");
                                                 }
-                                            } else {
-                                                String[] fileContent = new String[numMsg+1];
-                                                fileContent[index] = tmpData;
-                                                fileDataMap.put(fileName, fileContent);
-                                            }
 
 //                                        ChatView chatViewObj = new ChatView(-1, guestname, "File" + fileName);
 //                                        chatViewObj.setStatus(true);
 //                                        log(chatViewObj, false, false);
-                                        } else {
+                                            } else {
 //                                        ChatView chatViewObj = new ChatView(-1, guestname, content);
 //                                        chatViewObj.setStatus(true);
 //                                        log(chatViewObj, false, false);
-                                            log(tagNum + "//" + content, false, false);
+                                                log(tagNum + "//" + content, false, false);
+                                            }
+                                            receivedMsgList.add(obj);
                                         }
-                                        receivedMsgList.add(obj);
+
+                                        String responseMsg = "RECEIVED MESSAGE " + tagNum;
+                                        Message resMsgObj = new Message(responseMsg, username, priKey, guestPubKey, 0);
+                                        String resMsg = resMsgObj.createSecuredMsg();
+                                        startUDPSender(resMsg);
                                     }
 
-                                    String responseMsg = "RECEIVED MESSAGE " + tagNum;
-                                    Message resMsgObj = new Message(responseMsg, username, priKey, guestPubKey, 0);
-                                    String resMsg = resMsgObj.createSecuredMsg();
-                                    startUDPSender(resMsg);
-                                }
-
-                                if(content.contains("RECEIVED")) {
-                                    if(content.contains("RECEIVED FILE")) {
-                                        String fileName = content.replaceAll("RECEIVED FILE ", "");
-                                        if(fileDataMap.containsKey(fileName))
-                                            fileDataMap.remove(fileName);
-                                        log("File " + fileName, true, false);
+                                    if(content.contains("RECEIVED")) {
+                                        if(content.contains("RECEIVED FILE")) {
+                                            String fileName = content.replaceAll("RECEIVED FILE ", "");
+                                            if(fileDataMap.containsKey(fileName))
+                                                fileDataMap.remove(fileName);
+                                            log("File " + fileName, true, false);
 //                                        ChatView chatViewObj = new ChatView(tagNum, username, "File " + fileName);
 //                                        chatViewObj.setStatus(true);
 //                                        log(chatViewObj, true, false)
-                                        handler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                errorChatTxt.setText("Uploading completed");
-                                                uploadBtn.setEnabled(true);
-                                            }
-                                        });
-                                    } else {
-                                        int tagNum = Integer.valueOf(content.replaceAll("RECEIVED MESSAGE ", ""));
+                                            handler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    errorChatTxt.setText("Uploading completed");
+                                                    uploadBtn.setEnabled(true);
+                                                }
+                                            });
+                                        } else {
+                                            int tagNum = Integer.valueOf(content.replaceAll("RECEIVED MESSAGE ", ""));
 
-                                        Iterator i = sendMsgList.iterator();
-                                        while(i.hasNext()) {
-                                            Message msgObjTmp = (Message) i.next();
-                                            if(msgObjTmp.getTagNumber() == tagNum) {
-                                                removeMsgList.add(msgObjTmp);
-                                            }
-                                        }
-
-                                        if(!removeMsgList.isEmpty()) {
-                                            i = removeMsgList.iterator();
+                                            Iterator i = sendMsgList.iterator();
                                             while(i.hasNext()) {
-                                                Message objTmp = (Message) i.next();
-                                                content = objTmp.getOriginalContent();
-                                                if(!content.contains("FILE")) {
-                                                    log(tagNum + "//" + content, true, false);
+                                                Message msgObjTmp = (Message) i.next();
+                                                if(msgObjTmp.getTagNumber() == tagNum) {
+                                                    removeMsgList.add(msgObjTmp);
+                                                }
+                                            }
+
+                                            if(!removeMsgList.isEmpty()) {
+                                                i = removeMsgList.iterator();
+                                                while(i.hasNext()) {
+                                                    Message objTmp = (Message) i.next();
+                                                    content = objTmp.getOriginalContent();
+                                                    if(!content.contains("FILE")) {
+                                                        log(tagNum + "//" + content, true, false);
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+
+
                             }
                         }
                         data = new byte[65535];
@@ -455,7 +497,7 @@ public class ChatActivity extends AppCompatActivity {
         this.uploadBtn = (Button) this.findViewById(R.id.uploadFileBtn);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        System.out.println(guestname + "-" + guestIp + "-" + port);
+//        System.out.println(guestname + "-" + guestIp + "-" + port);
 
 //        guestNameTxt.setText(guestname + ": Disconnected");
         guestNameTxt.setText(guestname);
@@ -652,6 +694,7 @@ public class ChatActivity extends AppCompatActivity {
 //                        log(chatViewObj, true, true);
                         log(tagNumber + "//" + sendMsg, true, true);
                         tagNumber++;
+                        chatTxt.setText("");
 
 //                        sendMsgList.removeAll(removeMsgList);
 //                        removeMsgList.clear();
@@ -671,6 +714,11 @@ public class ChatActivity extends AppCompatActivity {
         exitChatBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(removeMsgList.size() != 0) {
+                    sendMsgList.removeAll(removeMsgList);
+                    removeMsgList.clear();
+                }
+
                 if(!sendMsgList.isEmpty()) {
                     builder.setTitle("Confirmation").setMessage("Some messages haven't sent yet. Do you want to exit?");
                     builder.setCancelable(true);
@@ -691,7 +739,7 @@ public class ChatActivity extends AppCompatActivity {
 //
 //                            }
                             try {
-                                Message msgObj = new Message("EXIT", username, priKey, guestPubKey, tagNumber);
+                                Message msgObj = new Message("EXIT ROOM " + port, username, priKey, guestPubKey, tagNumber);
                                 tagNumber++;
                                 String exitMsg = msgObj.createSecuredMsg();
                                 startUDPSender(exitMsg);
@@ -730,21 +778,77 @@ public class ChatActivity extends AppCompatActivity {
 //                        }
 //
 //                    }
-
-                    try {
-                        Message msgObj = new Message("EXIT", username, priKey, guestPubKey, tagNumber);
-                        String exitMsg = msgObj.createSecuredMsg();
-                        startUDPSender(exitMsg);
-                        tagNumber++;
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    boolean receivedFile = false;
+                    if(!fileDataMap.isEmpty()) {
+                        for(String[] fileContent: fileDataMap.values()) {
+                            if(containNull(fileContent)) {
+                                receivedFile = true;
+                                break;
+                            }
+                        }
                     }
 
-                    isExit = true;
-                    Intent newIntent = new Intent(ChatActivity.this, ChatMainActivity.class);
-                    newIntent.putExtra("PRI_KEY", priKeyStr);
-                    newIntent.putExtra("USERNAME", username);
-                    ChatActivity.this.startActivity(newIntent);
+                    if(receivedFile) {
+                        builder.setTitle("Confirmation").setMessage(guestname + " are sending file. Do you want to exit?");
+                        builder.setCancelable(true);
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+//                            if(!disconnected && socket.isConnected()) {
+//                                try {
+//                                    Message msgObj = new Message("EXIT", username, priKey, guestPubKey);
+//                                    tagNumber++;
+//                                    String exitMsg = msgObj.createSecuredMsg(tagNumber);
+//                                    out.write(exitMsg);
+//                                    out.newLine();
+//                                    out.flush();
+//                                } catch (Exception e) {
+//                                    e.printStackTrace();
+//                                }
+//
+//                            }
+                                try {
+                                    Message msgObj = new Message("EXIT ROOM " + port, username, priKey, guestPubKey, tagNumber);
+                                    tagNumber++;
+                                    String exitMsg = msgObj.createSecuredMsg();
+                                    startUDPSender(exitMsg);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                isExit = true;
+                                Intent newIntent = new Intent(ChatActivity.this, ChatMainActivity.class);
+                                newIntent.putExtra("PRI_KEY", priKeyStr);
+                                newIntent.putExtra("USERNAME", username);
+                                ChatActivity.this.startActivity(newIntent);
+                            }
+                        });
+
+                        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                    } else {
+                        try {
+                            Message msgObj = new Message("EXIT ROOM " + port, username, priKey, guestPubKey, tagNumber);
+                            String exitMsg = msgObj.createSecuredMsg();
+                            startUDPSender(exitMsg);
+                            tagNumber++;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        isExit = true;
+                        Intent newIntent = new Intent(ChatActivity.this, ChatMainActivity.class);
+                        newIntent.putExtra("PRI_KEY", priKeyStr);
+                        newIntent.putExtra("USERNAME", username);
+                        ChatActivity.this.startActivity(newIntent);
+                    }
                 }
             }
         });
@@ -821,4 +925,10 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
+//    @Override
+//    protected void onStop() {
+//        isExit = true;
+//        super.onStop();
+//    }
 }

@@ -8,29 +8,30 @@
 
     <Button
         android:id="@+id/btnChatExit"
-        android:layout_width="150dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="35dp"
-        android:layout_marginRight="35dp"
+        android:layout_width="119dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
         android:text="Exit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
         android:id="@+id/chatView"
-        android:layout_width="369dp"
-        android:layout_height="415dp"
-        android:layout_marginStart="14dp"
-        android:layout_marginLeft="14dp"
+        android:layout_width="393dp"
+        android:layout_height="441dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginLeft="4dp"
         android:layout_marginTop="21dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
         android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toTopOf="@+id/chatEditTxt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/errorChatTxtView" />
+        app:layout_constraintTop_toBottomOf="@+id/errorChatTxtView"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/guestNameTxt"
@@ -38,9 +39,10 @@
         android:layout_height="39dp"
         android:layout_marginStart="19dp"
         android:layout_marginLeft="19dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="27dp"
         android:layout_marginRight="27dp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/btnChatExit"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -53,7 +55,7 @@
         android:layout_marginLeft="13dp"
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginBottom="26dp"
+        android:layout_marginBottom="16dp"
         android:ems="10"
         android:hint="Enter message..."
         android:inputType="textPersonName"
@@ -63,27 +65,25 @@
 
     <Button
         android:id="@+id/sendBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="19dp"
+        android:layout_width="95dp"
+        android:layout_height="49dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_marginBottom="8dp"
         android:text="Send"
         app:layout_constraintBottom_toTopOf="@+id/uploadFileBtn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/chatEditTxt" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/errorChatTxtView"
         android:layout_width="360dp"
-        android:layout_height="36dp"
+        android:layout_height="47dp"
         android:layout_marginStart="19dp"
         android:layout_marginLeft="19dp"
         android:layout_marginTop="14dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnChatExit" />
@@ -106,14 +106,11 @@
         android:id="@+id/uploadFileBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginLeft="14dp"
         android:layout_marginEnd="7dp"
         android:layout_marginRight="7dp"
-        android:layout_marginBottom="21dp"
+        android:layout_marginBottom="16dp"
         android:text="Upload"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/fileChooserFragment" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

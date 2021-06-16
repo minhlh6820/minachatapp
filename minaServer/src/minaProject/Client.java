@@ -229,127 +229,123 @@ public class Client {
                         	msgObj.readSecuredMsg();
                             String content = msgObj.getContent();
                             if (content == null) {
-                               System.out.println("Error msg from " + guestname);
-                            } else {
-                                
-//                                System.out.println("Received message " + content);
-                       
-                                if (content.equals("EXIT")) {
+                               System.out.println("Error message from " + guestname);
+                            } else {                      
+                                if (content.equals("EXIT ROOM " + port)) {
                                 	receivedMsgList.clear();
-                                	tagNumber = 0;
-//                                    connected = false;
+                                	tagNumber = 1;
+                                	sending = false;
 //                                    break;
-                                } 
-                                                                                             
-                                if(!content.contains("RECEIVED")) {
-                                	boolean isReceived = false;
-                                    int tagNum = msgObj.getTagNumber();
-                                    Iterator i = receivedMsgList.iterator();
-                                    while(i.hasNext()) {
-                                        Message msgObjTmp = (Message) i.next();
-                                        if(msgObjTmp.getTagNumber() == tagNum && msgObjTmp.getContent().equals(content)) {
-                                            isReceived = true;
-                                            break;
-                                        }
-                                    }
-                                    
-                                	if(!isReceived) {
-                                		if(content.contains("FILE")) {
-                                            String fileMsg = content.replaceAll("FILE ", "");
-//                                            System.out.println(fileMsg);
-                                            String[] infoFile = fileMsg.split("::");
-                                            String fileName = infoFile[0].trim();
-                                            int index = Integer.valueOf(infoFile[1].trim());
-                                            int numMsg = Integer.valueOf(infoFile[2].trim());
-                                            String tmpData = infoFile[3].trim();
-                                            
-//                                            System.out.println(fileName + "::" + index + "::" + numMsg + "::" + tmpData);
-                                            
-                                            if(fileContentMap.containsKey(fileName)) {
-                                            	String[] fileContent = fileContentMap.get(fileName);
-                                            	fileContent[index] = tmpData;
-//                                            	System.out.println(containNull(fileContent));
-                                            	
-                                            	if(!containNull(fileContent)) {
-                                            		String fileData = "";
-                                            		for(String s: fileContent)
-                                            			fileData += s;
-                                            		byte[] fileStr = Base64.getDecoder().decode(fileData);
-//        	                                        
-        				  	  		 				fos = new FileOutputStream(fileName);
-        				  	  		 				fos.write(fileStr);
-        				  	  		 				fos.flush();
-        				  	  		 				fos.close();
-//        		  		 							System.out.println(file.length() + "-" + fileSize);
-        				  	  		 				System.out.println("File " + fileName + " created");
-        				  	  		 				String completedMsg = "RECEIVED FILE " + fileName;
-        				  	  		 				Message obj = new Message(completedMsg, name, priKey, guestPubKey, 0);
-        				  	  		 				completedMsg = obj.createSecuredMsg();
-        				  	  		 				startSender(completedMsg, guestIp, port);
-                                            	}
-                                            } else {
-                                            	String[] fileContent = new String[numMsg+1];
-                                            	fileContent[index] = tmpData;
-                                            	fileContentMap.put(fileName, fileContent);
-                                            }
-                                            
-//                                            System.out.println("Received msg file " + fileName);
-                                            
-                                    	} else {
-                                    		System.out.println("Received message " + content);
-                                    		//Testing
-                                    		if(content.equals("hello")) {
-                                    			//Start sending
-                                    			sending = true;
-                                    		}
-                                    	}
-                                		receivedMsgList.add(msgObj);
-                                	}                                	                              	
-                                                                    
-                                    String responseMsg = "RECEIVED MESSAGE " + tagNum;
-//                                    System.out.println("Send response msg: " + responseMsg);
-                                    Message resMsgObj = new Message(responseMsg, name, priKey, guestPubKey, 0);
-                                    String resMsg = resMsgObj.createSecuredMsg();
-                                    startSender(resMsg, guestIp, port);
-                                       
-//                                    Iterator it = sendMsgList.iterator();
-//                                    while(it.hasNext()) {
-//                                        msgObj = (Message) it.next();
-//                                        String securedMsg = msgObj.createSecuredMsg();
-//                                        startSender(securedMsg, guestIp, port, priKey, guestPubKey);
-//                                    }                                                                       
-                                }
-                                
-                                if(content.contains("RECEIVED")) {
-                                	if(content.contains("RECEIVED FILE")) {
-                                		String fileName = content.replaceAll("RECEIVED FILE ", "");
-                                		if(fileContentMap.containsKey(fileName))
-                                			fileContentMap.remove(fileName);
-//                                		System.out.println(fileContentMap.containsKey(fileName));
-                                		System.out.println(guestname + " get file " + fileName + " from " + name);
-                                	} else {
-                                		int tagNum = Integer.valueOf(content.replaceAll("RECEIVED MESSAGE ", ""));
-                                		
-                                		Iterator i = sendMsgList.iterator();
+                                } else if (content.equals("JOIN ROOM " + port)) {
+                                	sending = true;
+//                                    break;
+                                } else {
+                                	if(!content.contains("RECEIVED")) {
+                                    	boolean isReceived = false;
+                                        int tagNum = msgObj.getTagNumber();
+                                        Iterator i = receivedMsgList.iterator();
                                         while(i.hasNext()) {
                                             Message msgObjTmp = (Message) i.next();
-                                            if(msgObjTmp.getTagNumber() == tagNum) {
-                                                removeMsgList.add(msgObjTmp);
+                                            if(msgObjTmp.getTagNumber() == tagNum && msgObjTmp.getContent().equals(content)) {
+                                                isReceived = true;
+                                                break;
                                             }
                                         }
                                         
-                                        if(!removeMsgList.isEmpty()) {
-                                            i = removeMsgList.iterator();
+                                    	if(!isReceived) {
+                                    		if(content.contains("FILE")) {
+                                                String fileMsg = content.replaceAll("FILE ", "");
+//                                                System.out.println(fileMsg);
+                                                String[] infoFile = fileMsg.split("::");
+                                                String fileName = infoFile[0].trim();
+                                                int index = Integer.valueOf(infoFile[1].trim());
+                                                int numMsg = Integer.valueOf(infoFile[2].trim());
+                                                String tmpData = infoFile[3].trim();
+                                                
+//                                                System.out.println(fileName + "::" + index + "::" + numMsg + "::" + tmpData);
+                                                
+                                                if(fileContentMap.containsKey(fileName)) {
+                                                	String[] fileContent = fileContentMap.get(fileName);
+                                                	fileContent[index] = tmpData;
+//                                                	System.out.println(containNull(fileContent));
+                                                	
+                                                	if(!containNull(fileContent)) {
+                                                		String fileData = "";
+                                                		for(String s: fileContent)
+                                                			fileData += s;
+                                                		byte[] fileStr = Base64.getDecoder().decode(fileData);
+//            	                                        
+            				  	  		 				fos = new FileOutputStream(fileName);
+            				  	  		 				fos.write(fileStr);
+            				  	  		 				fos.flush();
+            				  	  		 				fos.close();
+//            		  		 							System.out.println(file.length() + "-" + fileSize);
+            				  	  		 				System.out.println("File " + fileName + " created");
+            				  	  		 				String completedMsg = "RECEIVED FILE " + fileName;
+            				  	  		 				Message obj = new Message(completedMsg, name, priKey, guestPubKey, 0);
+            				  	  		 				completedMsg = obj.createSecuredMsg();
+            				  	  		 				startSender(completedMsg, guestIp, port);
+                                                	}
+                                                } else {
+                                                	String[] fileContent = new String[numMsg+1];
+                                                	fileContent[index] = tmpData;
+                                                	fileContentMap.put(fileName, fileContent);
+                                                }
+                                                
+//                                                System.out.println("Received msg file " + fileName);
+                                                
+                                        	} else {
+                                        		System.out.println(name + " received message: " + content);                                   		
+                                        	}
+                                    		receivedMsgList.add(msgObj);
+                                    	}                                	                              	
+                                                                        
+                                        String responseMsg = "RECEIVED MESSAGE " + tagNum;
+//                                        System.out.println("Send response msg: " + responseMsg);
+                                        Message resMsgObj = new Message(responseMsg, name, priKey, guestPubKey, 0);
+                                        String resMsg = resMsgObj.createSecuredMsg();
+                                        startSender(resMsg, guestIp, port);
+                                           
+//                                        Iterator it = sendMsgList.iterator();
+//                                        while(it.hasNext()) {
+//                                            msgObj = (Message) it.next();
+//                                            String securedMsg = msgObj.createSecuredMsg();
+//                                            startSender(securedMsg, guestIp, port, priKey, guestPubKey);
+//                                        }                                                                       
+                                    }
+                                    
+                                    if(content.contains("RECEIVED")) {
+                                    	if(content.contains("RECEIVED FILE")) {
+                                    		String fileName = content.replaceAll("RECEIVED FILE ", "");
+                                    		if(fileContentMap.containsKey(fileName))
+                                    			fileContentMap.remove(fileName);
+//                                    		System.out.println(fileContentMap.containsKey(fileName));
+                                    		System.out.println(guestname + " get file " + fileName + " from " + name);
+                                    	} else {
+                                    		int tagNum = Integer.valueOf(content.replaceAll("RECEIVED MESSAGE ", ""));
+                                    		
+                                    		Iterator i = sendMsgList.iterator();
                                             while(i.hasNext()) {
-                                                Message obj = (Message) i.next();
-                                                tagNum = obj.getTagNumber();
-                                                System.out.println(guestname + " get message #" + tagNum);
-                                              
+                                                Message msgObjTmp = (Message) i.next();
+                                                if(msgObjTmp.getTagNumber() == tagNum) {
+                                                    removeMsgList.add(msgObjTmp);
+                                                }
                                             }
-                                        }
-                                        
-                                	}       
-                                } 
+                                            
+//                                            if(!removeMsgList.isEmpty()) {
+//                                                i = removeMsgList.iterator();
+//                                                while(i.hasNext()) {
+//                                                    Message obj = (Message) i.next();
+//                                                    tagNum = obj.getTagNumber();
+//                                                    System.out.println(guestname + " get message #" + tagNum);
+//                                                  
+//                                                }
+//                                            }
+                                            
+                                    	}
+                                    }
+                                }
+                                                                         
                             }
                         }
                         data = new byte[65535];
@@ -415,7 +411,7 @@ public class Client {
   	  	
   	  		 	PublicKey guestPubKey = getPubKeyFromStr(guestPubKeyStr);
   	  		 
-  	  		 	System.out.println(name + "-" + guestname + "-" + guestIp + "-" + port);
+//  	  		 	System.out.println(name + "-" + guestname + "-" + guestIp + "-" + port);
   	  		 
 //  	  		 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 //  	  		 LocalDateTime now = LocalDateTime.now();
@@ -673,81 +669,89 @@ public class Client {
 //  	  		 	System.out.println(socket.isClosed());
 //  	  		 	Thread.sleep(10000);
   	  		 	startServer(guestIp, port, keyPair.getPrivate(), guestPubKey, guestname);
-//  	  		 	String fileName = "F6MUU6(VJ)2.pdf";
+
+  	  		 	//Sending file
+//	  		 	String fileName = "F6MUU6(VJ)2.pdf";
+		 		String fileName = "Screenshot from 2021-03-29 18-06-32.png";
+		 		File file = new File(fileName);
+		 		if(file != null) {
+		 			try {
+		 				byte[] bytes = new byte[(int) file.length()];
+		 				fis = new FileInputStream(file);
+		 				fis.read(bytes, 0, bytes.length);
+		 				String fileStr = Base64.getEncoder().encodeToString(bytes);
+		 				int sizeData = 16384;
+                
+		 				int numMsg = (int) fileStr.length()/sizeData;
+		 				for(int start = 0; start < fileStr.length(); start += sizeData) {
+		 					int index = (int) start/sizeData;
+//                    		byte[] tmpBytes = Arrays.copyOfRange(bytes, start, (int) Math.min(file.length(), start + sizeData));
+//                    		String subFileStr = Base64.getEncoder().encodeToString(tmpBytes);
+		 					String subFileStr = fileStr.substring(start, Math.min(fileStr.length(), start + sizeData));
+		 					String fileNameMsg = "FILE " + file.getName() + "::" + index + "::" + numMsg + "::" + subFileStr;
+//                    		System.out.println(fileNameMsg);
+		 					Message msgObj = new Message(fileNameMsg, name, keyPair.getPrivate(), guestPubKey, tagNumber);
+		 					sendMsgList.add(msgObj);
+		 					tagNumber++;
+		 				}
+		 				fis.close();
+//		 				System.out.println("Sending file " + fileName);
+		 				sending = false;
+                
+		 			} catch (Exception e) {
+		 				System.out.println("Error when " + name + " sending file " + fileName);
+		 			}
+		 		}
+		 		
+		 		//Sending text
+//	  		 	for(int i=0; i<40; i++) {
+//  		 		sendMsgList.add(new Message("Test message #" + i, name, keyPair.getPrivate(), guestPubKey, tagNumber));
+//		 			tagNumber++;
+//  		 	}	
+  	  		 	
   	  		 	Thread t = new Thread(new Runnable() {
 					
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
+						String checkMsg = "";
+		                try {
+		                    Message msgObj = new Message("JOIN ROOM " + port, name, keyPair.getPrivate(), guestPubKey, 0);
+		                    checkMsg = msgObj.createSecuredMsg();
+		                } catch (Exception e) {
+		                    System.err.println("Cannot create check message");
+		                }
+						
 						while(true) {
 							try {
-								Thread.sleep(3000);
-							} catch (InterruptedException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
+								if(removeMsgList.size() != 0) {
+			  	  		 			sendMsgList.removeAll(removeMsgList);
+			  	  		 			removeMsgList.clear();
+			  	  		 		}
+//			  	  		 			System.out.println(sendMsgList.size());
+								startSender(checkMsg, guestIp, port);
+		                        Thread.sleep(1000);
+//		                        if(sending)
+//		                        	System.out.println(name + " check join: " + sending);
+								
+			  	  		 		if(sending && sendMsgList.size() != 0) {
+			  	  		 			try {
+			  	  		 				Iterator i = sendMsgList.iterator();
+			  	  		 				while(i.hasNext()) {
+			  	  		 					Message msgObj = (Message) i.next();
+			  	  		 					String securedMsg = msgObj.createSecuredMsg();
+			  	  		 					startSender(securedMsg, guestIp, port);
+			  	  		 				}
+			  	  		 				sending = false;
+			  	  		 				Thread.sleep(3000);
+			  	  		 			} catch (Exception e) {
+			  	  		 				e.printStackTrace();
+			  	  		 			}
+			  	  		 		}
+							} catch (Exception e) {
+								e.printStackTrace();
 							}
-							// If received message "hello", start sending
-		  	  		 		if(sending == true) {
-		  	  		 			System.out.println(name + " start sending");
-		  	  		 			//Sending file
-		  	  		 			String fileName = "Screenshot from 2021-03-29 18-06-32.png";
-		  	  		 			File file = new File(fileName);
-		  	  		 			if(file != null) {
-		  	  		 				try {
-		  	  		 					byte[] bytes = new byte[(int) file.length()];
-		  	  		 					fis = new FileInputStream(file);
-		  	  		 					fis.read(bytes, 0, bytes.length);
-		  	  		 					String fileStr = Base64.getEncoder().encodeToString(bytes);
-		  	  		 					int sizeData = 16384;
-			                    
-		  	  		 					int numMsg = (int) fileStr.length()/sizeData;
-		  	  		 					for(int start = 0; start < fileStr.length(); start += sizeData) {
-		  	  		 						int index = (int) start/sizeData;
-//			                        		byte[] tmpBytes = Arrays.copyOfRange(bytes, start, (int) Math.min(file.length(), start + sizeData));
-//			                        		String subFileStr = Base64.getEncoder().encodeToString(tmpBytes);
-		  	  		 						String subFileStr = fileStr.substring(start, Math.min(fileStr.length(), start + sizeData));
-		  	  		 						String fileNameMsg = "FILE " + file.getName() + "::" + index + "::" + numMsg + "::" + subFileStr;
-//			                        		System.out.println(fileNameMsg);
-		  	  		 						Message msgObj = new Message(fileNameMsg, name, keyPair.getPrivate(), guestPubKey, tagNumber);
-		  	  		 						sendMsgList.add(msgObj);
-		  	  		 						tagNumber++;
-		  	  		 					}
-		  	  		 					fis.close();
-		  	  		 					System.out.println("Sending file " + fileName);
-		  	  		 					sending = false;
-			                    
-		  	  		 				} catch (Exception e) {
-		  	  		 					System.out.println("Error when sending file " + fileName);
-		  	  		 				}
-		  	  		 			}
-		  	  		 		}
 		  	  		 		
-		  	  		 		//Sending text
-//		  	  		 		for(int i=0; i<40; i++) {
-//			  		 			sendMsgList.add(new Message("Test message #" + i, name, keyPair.getPrivate(), guestPubKey, tagNumber));
-//			  		 			tagNumber++;
-//			  		 		}  	 
-		  	  		 		
-		  	  		 		//Resent each 3 sec
-		  	  		 		while(sendMsgList.size() != 0) {
-		  	  		 			if(removeMsgList.size() != 0) {
-		  	  		 				sendMsgList.removeAll(removeMsgList);
-		  	  		 				removeMsgList.clear();
-		  	  		 			}
-//		  	  		 			System.out.println(sendMsgList.size());
-		  	  		 			try {
-		  	  		 				Iterator i = sendMsgList.iterator();
-		  	  		 				while(i.hasNext()) {
-		  	  		 					Message msgObj = (Message) i.next();
-		  	  		 					String securedMsg = msgObj.createSecuredMsg();
-		  	  		 					startSender(securedMsg, guestIp, port);
-		  	  		 				}
-		  	  		 				Thread.sleep(3000);
-		  	  		 			} catch (Exception e) {
-		  	  		 				e.printStackTrace();
-		  	  		 			}
-		  	  		 			
-		  	  		 		}
 		  	  		 	}	 	
 					}
 				});
