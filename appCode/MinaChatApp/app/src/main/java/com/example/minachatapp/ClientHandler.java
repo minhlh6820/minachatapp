@@ -86,6 +86,7 @@ public class ClientHandler extends IoHandlerAdapter {
 
         if(str.contains("FRIENDS LIST")) {
             str = str.replaceFirst("FRIENDS LIST " + username + ": ", "");
+            friendsList.clear();
             if(!str.equals("NULL")) {
                 String[] list = str.split("--");
                 for (String s: list) {
@@ -97,8 +98,8 @@ public class ClientHandler extends IoHandlerAdapter {
         }
 
         if(str.contains("REQUESTS LIST")) {
-            System.out.println(str);
             str = str.replaceFirst("REQUESTS LIST " + username + ": ", "");
+            requestedList.clear();
             if(!str.equals("NULL")) {
                 String[] list = str.split("--");
                 for (String s: list) {

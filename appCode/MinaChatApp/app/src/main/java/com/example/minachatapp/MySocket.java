@@ -23,6 +23,10 @@ public class MySocket {
 
     }
 
+    public MySocket(String serverIp) {
+        this.serverIp = serverIp;
+    }
+
     public MySocket(String serverIp, int serverPort) {
         this.serverIp = serverIp;
         this.serverPort = serverPort;

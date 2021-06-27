@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 public class FriendsListActivity extends AppCompatActivity {
     private String priKey = null;
     private String username = null;
+    private String serverIp = null;
     private InetSocketAddress socket = null;
     private String[] connectedList = new String[]{};
 
@@ -57,6 +58,7 @@ public class FriendsListActivity extends AppCompatActivity {
 
         priKey = getIntent().getStringExtra("PRI_KEY");
         username = getIntent().getStringExtra("USERNAME");
+        serverIp = getIntent().getStringExtra("SERVERIP");
 
         this.connectedListView = (ListView) this.findViewById(R.id.connectedListView);
         this.searchTxt = (TextView) this.findViewById(R.id.editTextSearchFriend);
@@ -93,6 +95,7 @@ public class FriendsListActivity extends AppCompatActivity {
                 Intent newIntent = new Intent(FriendsListActivity.this, ChatMainActivity.class);
                 newIntent.putExtra("PRI_KEY", priKey);
                 newIntent.putExtra("USERNAME", username);
+                newIntent.putExtra("SERVERIP", serverIp);
                 FriendsListActivity.this.startActivity(newIntent);
             }
         });
@@ -100,7 +103,7 @@ public class FriendsListActivity extends AppCompatActivity {
 
     private void openConnector() {
         try {
-            MySocket socketObj = new MySocket();
+            MySocket socketObj = new MySocket(serverIp);
             socket = socketObj.getServerSocket();
             connector = new NioSocketConnector();
             LoggingFilter log = new LoggingFilter();
@@ -172,6 +175,7 @@ public class FriendsListActivity extends AppCompatActivity {
                     chatIntent.putExtra("GUEST_PUB_KEY", guestPubKey);
                     chatIntent.putExtra("PRI_KEY", priKey);
                     chatIntent.putExtra("USERNAME", username);
+                    chatIntent.putExtra("SERVERIP", serverIp);
 //                    chatIntent.putExtra("SERVER", server);
                     FriendsListActivity.this.startActivity(chatIntent);
                 }

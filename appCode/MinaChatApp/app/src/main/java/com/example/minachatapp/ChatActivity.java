@@ -46,6 +46,8 @@ public class ChatActivity extends AppCompatActivity {
     private String guestname = null;
     private PublicKey guestPubKey = null;
     private int port = -1;
+    private String serverIp = null;
+
 //    private boolean server = false;
 
     private ArrayList<String> chatViewList = new ArrayList<String>();
@@ -250,6 +252,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
             t.start();
+            errorChatTxt.setText("");
         } catch (UnknownHostException ue) {
             errorChatTxt.setText("Disconnected");
         } catch (Exception e) {
@@ -340,6 +343,13 @@ public class ChatActivity extends AppCompatActivity {
                                     tagNumber = 1;
                                     sending = false;
                                     guestNameTxt.setText(guestname + ": Exit room");
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            chatViewList.clear();
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    });
                                 } else if(content.equals("JOIN ROOM " + port)) {
                                     sending = true;
                                     guestNameTxt.setText(guestname + ": Join room");
@@ -480,6 +490,7 @@ public class ChatActivity extends AppCompatActivity {
         this.guestIp = getIntent().getStringExtra("GUEST_IP");
         this.guestname = getIntent().getStringExtra("GUEST_NAME");
         String guestPubKeyStr = getIntent().getStringExtra("GUEST_PUB_KEY");
+        this.serverIp = getIntent().getStringExtra("SERVERIP");
 //        this.server = getIntent().getBooleanExtra("SERVER", true);
 
         try {
@@ -597,7 +608,8 @@ public class ChatActivity extends AppCompatActivity {
                 String msg = (String) chatView.getItemAtPosition(position);
                 if(msg.contains("File") && msg.contains(guestname)) {
                     msg = msg.split("//", 2)[1].trim();
-                    String fileName = msg.replaceAll("File ", "");
+                    msg = msg.replaceAll("File ", "");
+                    String fileName = msg.replaceAll("-- Received", "").trim();
                     builder.setTitle("Confirmation").setMessage("Do you want to download '" + fileName + "'?");
                     builder.setCancelable(true);
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -751,6 +763,7 @@ public class ChatActivity extends AppCompatActivity {
                             Intent newIntent = new Intent(ChatActivity.this, ChatMainActivity.class);
                             newIntent.putExtra("PRI_KEY", priKeyStr);
                             newIntent.putExtra("USERNAME", username);
+                            newIntent.putExtra("SERVERIP", serverIp);
                             ChatActivity.this.startActivity(newIntent);
                         }
                     });
@@ -820,6 +833,7 @@ public class ChatActivity extends AppCompatActivity {
                                 Intent newIntent = new Intent(ChatActivity.this, ChatMainActivity.class);
                                 newIntent.putExtra("PRI_KEY", priKeyStr);
                                 newIntent.putExtra("USERNAME", username);
+                                newIntent.putExtra("SERVERIP", serverIp);
                                 ChatActivity.this.startActivity(newIntent);
                             }
                         });
@@ -847,6 +861,7 @@ public class ChatActivity extends AppCompatActivity {
                         Intent newIntent = new Intent(ChatActivity.this, ChatMainActivity.class);
                         newIntent.putExtra("PRI_KEY", priKeyStr);
                         newIntent.putExtra("USERNAME", username);
+                        newIntent.putExtra("SERVERIP", serverIp);
                         ChatActivity.this.startActivity(newIntent);
                     }
                 }

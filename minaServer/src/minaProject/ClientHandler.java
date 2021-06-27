@@ -80,6 +80,7 @@ public class ClientHandler extends IoHandlerAdapter {
 
         if(str.contains("FRIENDS LIST")) {
         	str = str.replaceFirst("FRIENDS LIST " + username + ": ", "");
+        	connectedList.clear();
             String[] list = str.split("--", 2);
             for (String s: list) {
                 connectedList.add(s);

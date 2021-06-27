@@ -8,47 +8,63 @@
 
     <Button
         android:id="@+id/btnBackChatMain"
-        android:layout_width="137dp"
-        android:layout_height="67dp"
-        android:layout_marginStart="258dp"
-        android:layout_marginLeft="258dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:text="Back"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="@id/friends_gl2"
+        app:layout_constraintStart_toStartOf="@id/friends_gl1"
+        app:layout_constraintTop_toTopOf="@id/friends_hgl2"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <ListView
         android:id="@+id/connectedListView"
-        android:layout_width="404dp"
-        android:layout_height="546dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="7dp"
-        android:layout_marginRight="7dp"
-        android:layout_marginBottom="11dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnBackChatMain"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSearchFriend">
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/friends_hgl2"
+        app:layout_constraintEnd_toEndOf="@id/friends_gl2"
+        app:layout_constraintStart_toStartOf="@id/friends_gl1"
+        app:layout_constraintTop_toTopOf="@+id/friends_hgl1">
 
     </ListView>
 
     <EditText
         android:id="@+id/editTextSearchFriend"
-        android:layout_width="353dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="29dp"
-        android:layout_marginLeft="29dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="29dp"
-        android:layout_marginRight="29dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:ems="10"
-        android:hint="Enter name to search..."
+        android:hint="Search friend..."
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/friends_hgl1"
+        app:layout_constraintEnd_toEndOf="@id/friends_gl2"
+        app:layout_constraintStart_toStartOf="@id/friends_gl1"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/friends_gl1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/friends_gl2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.9" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/friends_hgl1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/friends_hgl2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

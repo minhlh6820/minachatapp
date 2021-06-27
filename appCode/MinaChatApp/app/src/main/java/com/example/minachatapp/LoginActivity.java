@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.mina.core.future.ConnectFuture;
@@ -27,11 +28,11 @@ public class LoginActivity extends AppCompatActivity {
     private Button submitLoginBtn;
     private EditText usernameTxt;
     private EditText pwdTxt;
-    private TextView errorLoginTxt;
 
     private KeyPair keyPair = null;
     private String pubKey;
     private String priKey;
+    private String serverIp;
 
     private Key keyObj = null;
 
@@ -53,7 +54,8 @@ public class LoginActivity extends AppCompatActivity {
         this.submitLoginBtn = (Button) this.findViewById(R.id.btnSubmitLogin);
         this.usernameTxt = (EditText) this.findViewById(R.id.editTextUsername);
         this.pwdTxt = (EditText) this.findViewById(R.id.editTextPwd);
-        this.errorLoginTxt = (TextView) this.findViewById(R.id.errorLoginTxt);
+
+        this.serverIp = getIntent().getStringExtra("SERVERIP");
 
         submitLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,14 +64,13 @@ public class LoginActivity extends AppCompatActivity {
                 String username = usernameTxt.getText().toString().trim();
                 String pwd = pwdTxt.getText().toString().trim();
                 if (username == "" || pwd == "") {
-                    errorLoginTxt.setVisibility(View.VISIBLE);
-                    errorLoginTxt.setText("Error! Please enter username and password!");
+                    Toast.makeText(LoginActivity.this, "Error! Please enter username and password!", Toast.LENGTH_SHORT).show();
                 } else {
                     try {
                         keyPair = keyObj.generateKeyPair();
                         pubKey = keyObj.getPubKeyStr(keyPair);
                         String msg = "LOGIN: " + username + "--" + pwd + "--" + pubKey;
-                        MySocket socketObj = new MySocket();
+                        MySocket socketObj = new MySocket(serverIp);
                         InetSocketAddress socket = socketObj.getServerSocket();
 
                         NioSocketConnector connector = new NioSocketConnector();
@@ -99,10 +100,10 @@ public class LoginActivity extends AppCompatActivity {
                     priKey = keyObj.getPriKeyStr(keyPair);
                     submitIntent.putExtra("PRI_KEY", priKey);
                     submitIntent.putExtra("USERNAME", username);
+                    submitIntent.putExtra("SERVERIP", serverIp);
                     LoginActivity.this.startActivity(submitIntent);
                 } else {
-                    errorLoginTxt.setVisibility(View.VISIBLE);
-                    errorLoginTxt.setText("Error! Wrong account!");
+                    Toast.makeText(LoginActivity.this, "Error! Wrong account!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -110,7 +111,7 @@ public class LoginActivity extends AppCompatActivity {
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent intent = new Intent(LoginActivity.this, StartActivity.class);
                 LoginActivity.this.startActivity(intent);
             }
         });

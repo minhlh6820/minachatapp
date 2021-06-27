@@ -31,6 +31,7 @@ import java.nio.charset.Charset;
 public class ChatMainActivity extends AppCompatActivity {
     private String priKey = null;
     private String username = null;
+    private String serverIp = null;
     private InetSocketAddress socket = null;
     private String[] requestedList = new String[]{};
 
@@ -63,6 +64,7 @@ public class ChatMainActivity extends AppCompatActivity {
 
         priKey = getIntent().getStringExtra("PRI_KEY");
         username = getIntent().getStringExtra("USERNAME");
+        serverIp = getIntent().getStringExtra("SERVERIP");
 
         this.unameTxt = (TextView) this.findViewById(R.id.unTxtView1);
         this.roomNumTxt = (TextView) this.findViewById(R.id.roomNumTxtView);
@@ -105,6 +107,7 @@ public class ChatMainActivity extends AppCompatActivity {
                 Intent newIntent = new Intent(ChatMainActivity.this, FriendsListActivity.class);
                 newIntent.putExtra("PRI_KEY", priKey);
                 newIntent.putExtra("USERNAME", username);
+                newIntent.putExtra("SERVERIP", serverIp);
                 ChatMainActivity.this.startActivity(newIntent);
             }
         });
@@ -143,6 +146,7 @@ public class ChatMainActivity extends AppCompatActivity {
                 connector.dispose();
 
                 Intent loginIntent = new Intent(ChatMainActivity.this, LoginActivity.class);
+                loginIntent.putExtra("SERVERIP", serverIp);
                 ChatMainActivity.this.startActivity(loginIntent);
             }
         });
@@ -150,7 +154,7 @@ public class ChatMainActivity extends AppCompatActivity {
 
     private void openConnector() {
         try {
-            MySocket socketObj = new MySocket();
+            MySocket socketObj = new MySocket(serverIp);
             socket = socketObj.getServerSocket();
             connector = new NioSocketConnector();
             LoggingFilter log = new LoggingFilter();
@@ -235,6 +239,7 @@ public class ChatMainActivity extends AppCompatActivity {
                     chatIntent.putExtra("GUEST_PUB_KEY", guestPubKey);
                     chatIntent.putExtra("PRI_KEY", priKey);
                     chatIntent.putExtra("USERNAME", username);
+                    chatIntent.putExtra("SERVERIP", serverIp);
 //                    chatIntent.putExtra("SERVER", server);
                     ChatMainActivity.this.startActivity(chatIntent);
                 }

@@ -37,6 +37,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.session.IoSession;
@@ -52,11 +55,11 @@ import org.spongycastle.util.encoders.Hex;
  */
 
 public class Client {
-	private static final int PORT = 9123;
-//	private static final String HOSTNAME = "fe80::54f9:2dc:65f3:15e4";
+	private int PORT = 9123;
+	private String serverIp = "fe80::54f9:2dc:65f3:15e4";
 //	private static final String HOSTNAME = "fe80::5cba:fe5d:65cf:18d9";
 //  private static final String HOSTNAME = "fe80::b1b6:c7e8:90b8:b913";
-	private static final String HOSTNAME = "fe80::78c:1956:9911:b3ec";
+//	private static final String HOSTNAME = "fe80::78c:1956:9911:b3ec";
 	
 //	private ServerSocket serverSocket = null;
 //	private Socket socket = null;
@@ -367,7 +370,7 @@ public class Client {
     		String str_pKey = getPubKeyStr(keyPair);
 //    		String name = "client1";
 //    		String pwd = "pass1";
-    		InetSocketAddress socketaddr = getSocketAddress(HOSTNAME, PORT);
+    		InetSocketAddress socketaddr = getSocketAddress(serverIp, PORT);
     		// Converting string to Bytes
     		// byte_pubkey  = Base64.getDecoder().decode(str_pKey);
     		String msg = "LOGIN: " + name + "--" + pwd + "--" + str_pKey;  
@@ -765,19 +768,20 @@ public class Client {
   }
 
   public static void main(String[] args) {
-	  for(int i=1; i<101; i++) {
-		  int index = i;
-		  Thread thread = new Thread(new Runnable() {
-			  @Override
-			  public void run() {
-				  Client client = new Client("client" + index, "pass" + index);
-				  client.run();
-			  }
-		  });
-		  thread.start();
-	  }
+	    
+//	  for(int i=1; i<101; i++) {
+//		  int index = i;
+//		  Thread thread = new Thread(new Runnable() {
+//			  @Override
+//			  public void run() {
+//				  Client client = new Client("client" + index, "pass" + index);
+//				  client.run();
+//			  }
+//		  });
+//		  thread.start();
+//	  }
 //      
-//	  Client client = new Client("client1", "pass1");
-//	  client.run();
+	  Client client = new Client("client1", "pass1");
+	  client.run();
   }
 }
